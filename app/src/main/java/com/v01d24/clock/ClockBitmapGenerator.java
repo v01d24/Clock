@@ -8,6 +8,8 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
+import java.util.Calendar;
+
 class ClockBitmapGenerator {
 
     private static final int AXES_COUNT = 6;
@@ -144,12 +146,7 @@ class ClockBitmapGenerator {
 
         drawBackground();
         drawAxes();
-        drawSector(segmentMX1, sectorColors[0]);
-        drawSector(segmentMX5, sectorColors[1]);
-        drawSector(segmentMX20, sectorColors[2]);
-        drawSector(segmentHX1, sectorColors[0]);
-        drawSector(segmentHX4, sectorColors[1]);
-        drawSector(segmentHX12, sectorColors[2]);
+        drawSectors();
 
         return bitmap;
     }
@@ -166,10 +163,23 @@ class ClockBitmapGenerator {
         }
     }
 
-    private void drawSector(Path[] sector, int color) {
+    private void drawSectors() {
+        Calendar now = Calendar.getInstance();
+        int hours = now.get(Calendar.HOUR_OF_DAY);
+        int minutes = now.get(Calendar.MINUTE);
+
+        drawSector(segmentMX1, sectorColors[0], minutes % 5);
+        drawSector(segmentMX5, sectorColors[1], (minutes % 20) / 5);
+        drawSector(segmentMX20, sectorColors[2], minutes / 20);
+        drawSector(segmentHX1, sectorColors[0], hours % 4);
+        drawSector(segmentHX4, sectorColors[1], (hours % 12) / 4);
+        drawSector(segmentHX12, sectorColors[2], hours / 12);
+    }
+
+    private void drawSector(Path[] sector, int color, int segments) {
         paint.setColor(color);
-        for (Path segment: sector) {
-            canvas.drawPath(segment, paint);
+        for (int i = 0; i < segments; ++i) {
+            canvas.drawPath(sector[i], paint);
         }
     }
 
