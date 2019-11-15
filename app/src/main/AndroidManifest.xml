@@ -15,5 +15,9 @@
                 android:resource="@xml/widget_provider" />
         </receiver>
 
+        <service android:name=".ClockService"
+            android:enabled="true"
+            android:exported="true"/>
+
     </application>
 </manifest>

@@ -7,10 +7,13 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.util.Log;
 
 import java.util.Calendar;
 
 class ClockBitmapGenerator {
+
+    private static final String TAG = ClockBitmapGenerator.class.getSimpleName();
 
     private static final int AXES_COUNT = 6;
     private static final int CIRCLES_COUNT = 11;
@@ -22,7 +25,7 @@ class ClockBitmapGenerator {
 
     private int backgroundColor = Color.argb(125, 0, 0, 0);
     private int[] sectorColors = new int[] {
-        Color.BLUE, Color.GREEN, Color.RED
+        Color.DKGRAY, Color.BLUE, Color.GREEN, Color.RED
     };
 
     private PointF center = new PointF();
@@ -46,11 +49,11 @@ class ClockBitmapGenerator {
     }
 
     private final Bitmap.Config bitmapConfig = Bitmap.Config.ARGB_8888;
-    private final Canvas canvas;
     private final Paint paint;
 
     static ClockBitmapGenerator getInstance(int width, int height) {
         if (instance == null) {
+            Log.e(TAG, "ClockBitmapGenerator new instance");
             instance = new ClockBitmapGenerator();
         }
         instance.setSize(width, height);
@@ -58,7 +61,6 @@ class ClockBitmapGenerator {
     }
 
     private ClockBitmapGenerator() {
-        canvas = new Canvas();
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL);
@@ -96,12 +98,12 @@ class ClockBitmapGenerator {
     }
 
     private void updateSectors() {
-        updateSector(segmentMX1, -75, -45);
+        updateSector(segmentMX20, -75, -45);
         updateSector(segmentMX5, -15, 15);
-        updateSector(segmentMX20, 45, 75);
-        updateSector(segmentHX1, 105, 135);
+        updateSector(segmentMX1, 45, 75);
+        updateSector(segmentHX12, 105, 135);
         updateSector(segmentHX4, 165, 195);
-        updateSector(segmentHX12, 225, 255);
+        updateSector(segmentHX1, 225, 255);
     }
 
     private void updateSector(Path[] sector, int angleFromDeg, int angleToDeg) {
@@ -141,45 +143,53 @@ class ClockBitmapGenerator {
     }
 
     Bitmap generate() {
+        Canvas canvas = new Canvas();
+
         Bitmap bitmap = Bitmap.createBitmap(width, height, bitmapConfig);
         canvas.setBitmap(bitmap);
 
-        drawBackground();
-        drawAxes();
-        drawSectors();
+        drawBackground(canvas);
+        drawAxes(canvas);
+        drawSectors(canvas);
 
         return bitmap;
     }
 
-    private void drawBackground() {
+    private void drawBackground(Canvas canvas) {
         paint.setColor(backgroundColor);
         canvas.drawCircle(center.x, center.y, radius, paint);
     }
 
-    private void drawAxes() {
+    private void drawAxes(Canvas canvas) {
         paint.setColor(Color.WHITE);
         for (LineF axe: axes) {
             canvas.drawLine(axe.x1, axe.y1, axe.x2, axe.y2, paint);
         }
     }
 
-    private void drawSectors() {
+    private void drawSectors(Canvas canvas) {
         Calendar now = Calendar.getInstance();
         int hours = now.get(Calendar.HOUR_OF_DAY);
         int minutes = now.get(Calendar.MINUTE);
 
-        drawSector(segmentMX1, sectorColors[0], minutes % 5);
-        drawSector(segmentMX5, sectorColors[1], (minutes % 20) / 5);
-        drawSector(segmentMX20, sectorColors[2], minutes / 20);
-        drawSector(segmentHX1, sectorColors[0], hours % 4);
-        drawSector(segmentHX4, sectorColors[1], (hours % 12) / 4);
-        drawSector(segmentHX12, sectorColors[2], hours / 12);
+        drawSector(canvas, segmentMX1, minutes % 5, 1);
+        drawSector(canvas, segmentMX5, (minutes % 20) / 5, 2);
+        drawSector(canvas, segmentMX20, minutes / 20, 3);
+        drawSector(canvas, segmentHX1, hours % 4, 1);
+        drawSector(canvas, segmentHX4, (hours % 12) / 4, 2);
+        drawSector(canvas, segmentHX12, hours / 12, 3);
     }
 
-    private void drawSector(Path[] sector, int color, int segments) {
-        paint.setColor(color);
+    private void drawSector(Canvas canvas, Path[] sector, int segments, int colorIndex) {
+        paint.setColor(sectorColors[colorIndex]);
         for (int i = 0; i < segments; ++i) {
             canvas.drawPath(sector[i], paint);
+        }
+        if (segments < sector.length) {
+            paint.setColor(sectorColors[0]);
+            for (int i = segments; i < sector.length; ++i) {
+                canvas.drawPath(sector[i], paint);
+            }
         }
     }
 
