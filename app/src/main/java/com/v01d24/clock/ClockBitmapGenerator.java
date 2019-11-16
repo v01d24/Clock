@@ -7,18 +7,13 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.util.Log;
 
 import java.util.Calendar;
 
 class ClockBitmapGenerator {
 
-    private static final String TAG = ClockBitmapGenerator.class.getSimpleName();
-
     private static final int AXES_COUNT = 6;
     private static final int CIRCLES_COUNT = 11;
-
-    private static ClockBitmapGenerator instance;
 
     private int width;
     private int height;
@@ -51,22 +46,14 @@ class ClockBitmapGenerator {
     private final Bitmap.Config bitmapConfig = Bitmap.Config.ARGB_8888;
     private final Paint paint;
 
-    static ClockBitmapGenerator getInstance(int width, int height) {
-        if (instance == null) {
-            Log.e(TAG, "ClockBitmapGenerator new instance");
-            instance = new ClockBitmapGenerator();
-        }
-        instance.setSize(width, height);
-        return instance;
-    }
-
-    private ClockBitmapGenerator() {
+    ClockBitmapGenerator(int width, int height) {
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL);
+        setSize(width, height);
     }
 
-    private void setSize(int width, int height) {
+    void setSize(int width, int height) {
         if (this.width != width || this.height != height) {
             this.width = width;
             this.height = height;
