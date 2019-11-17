@@ -63,7 +63,9 @@ public class ClockService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        String action = intent.getAction();
+        String action;
+        if (intent != null) action = intent.getAction();
+        else action = ACTION_UPDATE_WIDGET;
         Log.e(TAG, "onStartCommand action=" + action);
 
         if (ACTION_UPDATE_WIDGET.equals(action)) {
